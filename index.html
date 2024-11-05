@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Карта водно-болотних угідь</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geologica&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Geologica", sans-serif;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+      .fit {
+        z-index: 1000;
+        float: center;
+        position: relative;
+        margin: 0px 10px;
+        height: 30px;
+        padding: 5px 20px;
+        border: none;
+        border-radius: 0px 0px 8px 8px;
+        font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+        color: black;
+        background: #0b444e;
+      }
+    </style>
+  </head>
+  <body>
+    <style>
+      .mapboxgl-popup {
+        max-width: 400px;
+        font: 12px/20px "Geologica", sans-serif;
+      }
+      .map-overlay {
+        font: 12px/20px "Geologica", sans-serif;
+        position: absolute;
+        width: 300px;
+        top: 45%;
+        left: 0;
+        padding: 10px;
+        z-index: 300;
+      }
+
+      .map-overlay .map-overlay-inner {
+        background-color: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+    </style>
+    <ul
+      style="position: relative; z-index: 1000"
+      class="menu bg-base-200 w-1/5 rounded-box m-5 space-y-2"
+    >
+      <div>Як виглядають водно-болотні угіддя із супутника?</div>
+      <li id="meandry_canals" class="btn btn-warning">
+        <a>Русло річки</a>
+      </li>
+      <li id="ozero_stavok" class="btn btn-success text-left">
+        <a>Озеро</a>
+      </li>
+      <li id="torforozrobka_boloto_burshtyn" class="btn btn-accent">
+        <a> Болото</a>
+      </li>
+    </ul>
+    <div id="map"></div>
+    <script>
+      mapboxgl.accessToken =
+        "pk.eyJ1IjoidmFkZW52bWFwa3lpdiIsImEiOiJja2RwczBzcXYwMjgzMnprdWVxMTB2aWU0In0.OBDKIqeo6YDnxaEZR4bdIA";
+      const map = new mapboxgl.Map({
+        container: "map", // container ID
+        style: "mapbox://styles/mapbox/satellite-streets-v12",
+        center: [26.554527384689376, 51.09511341562768], // starting position [lng, lat]
+        zoom: 8.25, // starting zoom
+      });
+
+      document
+        .getElementById("meandry_canals")
+        .addEventListener("click", () => {
+          map.flyTo({
+            center: [26.321085494469713, 50.98175177745017],
+            zoom: 11.25,
+          });
+        });
+
+      document.getElementById("ozero_stavok").addEventListener("click", () => {
+        map.flyTo({
+          center: [26.34991, 50.72155],
+          zoom: 13.75,
+        });
+      });
+      document
+        .getElementById("torforozrobka_boloto_burshtyn")
+        .addEventListener("click", () => {
+          map.flyTo({
+            center: [27.055037618042064, 51.47297057600855],
+            zoom: 10.5,
+          });
+        });
+
+      map.on("load", () => {
+        map.loadImage("/circumference.png", (error, image) => {
+          if (error) throw error;
+
+          // Add the image to the map style.
+          map.addImage("cat", image);
+          // Add a data source containing  point features.
+          map.addSource("points", {
+            type: "geojson",
+            data: "/markers.geojson",
+          });
+
+          // Add a layer to use the image to represent the data.
+          map.addLayer({
+            id: "points",
+            type: "symbol",
+            source: "points", // reference the data source
+            layout: {
+              "icon-image": "cat", // reference the image
+              "icon-size": 1,
+            },
+          });
+        });
+        // Add a data source containing polygons.
+        map.addSource("polygons", {
+          type: "geojson",
+          data: "/polygons.geojson",
+        });
+
+        // Popup on points click.
+        map.on("click", "points", (e) => {
+          new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(e.features[0].properties.name)
+            .addTo(map);
+        });
+
+        // Change the cursor to a pointer when
+        // the mouse is over the states layer.
+        map.on("mouseenter", "fill_polygons", () => {
+          map.getCanvas().style.cursor = "pointer";
+        });
+
+        // Change the cursor back to a pointer
+        // when it leaves the states layer.
+        map.on("mouseleave", "fill_polygons", () => {
+          map.getCanvas().style.cursor = "";
+        });
+
+        map.on("click", "fill_polygons", (e) => {
+          // Центрування карти на вибраному об'єкті - ОК
+          const clickedPolygon = e.features[0];
+          const bbox = turf.bbox(clickedPolygon);
+          map.fitBounds(bbox, {
+            maxZoom: 15,
+            padding: 100,
+            duration: 2500,
+          });
+        });
+
+        // Polygons of bolotas.
+        map.addLayer({
+          id: "fill_polygons",
+          type: "fill",
+          source: "polygons", // reference the data source
+          layout: {},
+          paint: {
+            "fill-color": ["get", "color"],
+            "fill-opacity": 0.02,
+          },
+        });
+        // Lines of bolotas.
+        map.addLayer({
+          id: "line",
+          type: "line",
+          source: "polygons", // reference the data source
+          paint: {
+            "line-color": ["get", "color"],
+            "line-width": 7, // ширина лінії підсвітки
+            "line-blur": 5, // ступінь розмиття
+          },
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
