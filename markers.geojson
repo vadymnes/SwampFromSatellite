@@ -1,0 +1,75 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Місце, де видобувають бурштин"
+      },
+      "geometry": {
+        "coordinates": [27.048499731984123, 51.516963302318544],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Місце, де видобувають торф"
+      },
+      "geometry": {
+        "coordinates": [26.984965177292537, 51.399981977853116],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Спрямлена річка та система каналів"
+      },
+      "geometry": {
+        "coordinates": [26.31603939777486, 51.01552584369884],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Природні звивини річки (меандри)"
+      },
+      "geometry": {
+        "coordinates": [26.314640393520335, 50.95340358519098],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Ставок, зроблений людиною"
+      },
+      "geometry": {
+        "coordinates": [26.358118430803188, 50.72259396007752],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Озеро природнє (стариця)"
+      },
+      "geometry": {
+        "coordinates": [26.35846870797704, 50.729737986523645],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Живе болото"
+      },
+      "geometry": {
+        "coordinates": [27.18196933269988, 51.50155545586509],
+        "type": "Point"
+      }
+    }
+  ]
+}
